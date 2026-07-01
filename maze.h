@@ -17,17 +17,18 @@ typedef struct {
     Point path[MAX_SIZE * MAX_SIZE];
     int length;
     int cells_visited;
+    Point exploration_order[MAX_SIZE * MAX_SIZE];
 } SolveResult;
 
-// Person A's functions (defined in maze_generate.c)
 Maze create_maze(int rows, int cols);
 void generate_maze(Maze *m, int seed);
 int save_maze(Maze *m, const char *filename);
 Maze load_maze(const char *filename);
 
-// Person B's functions (defined in maze_solve.c)
 SolveResult solve_bfs(Maze *m, Point start, Point end);
 void print_maze(Maze *m);
 void print_path_overlay(Maze *m, SolveResult *r);
+int save_maze_solved(Maze *m, SolveResult *r, Point start, Point end, const char *filename);
+int save_exploration(SolveResult *r, const char *filename);
 
 #endif

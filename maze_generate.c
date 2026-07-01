@@ -135,7 +135,23 @@ Maze load_maze(const char *filename)
         return m;
     }
 
-    fscanf(fp, "%d %d\n", &m.rows, &m.cols);
+    if (fscanf(fp, "%d %d\n", &m.rows, &m.cols) != 2)
+    {
+        fclose(fp);
+        m.rows = 0;
+        m.cols = 0;
+        return m;
+    }
+
+    // Reject sizes that would overflow the fixed grid.
+    int max_cells = (MAX_SIZE - 1) / 2;
+    if (m.rows < 1 || m.cols < 1 || m.rows > max_cells || m.cols > max_cells)
+    {
+        fclose(fp);
+        m.rows = 0;
+        m.cols = 0;
+        return m;
+    }
 
     int height = 2 * m.rows + 1;
     int width = 2 * m.cols + 1;

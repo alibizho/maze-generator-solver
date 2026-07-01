@@ -104,3 +104,126 @@ SolveResult solve_bfs(Maze *m, Point start, Point end){
 
     return result;
 }
+
+
+
+
+
+void print_maze(Maze *m){
+
+    int grid_h = 2 * m->rows + 1;
+    int grid_w = 2 * m->cols + 1;
+
+    for (int r = 0; r < grid_h; r++){
+        for (int c= 0; c< grid_w; c++){
+            if (m->grid[r][c] == 1){
+                printf("#");
+            } else{
+                printf(" ");
+            }
+        }
+        printf("\n");
+    }
+}
+
+
+void print_path_overlay(Maze *m, SolveResult *result){
+    int grid_h = 2 * m->rows + 1;
+    int grid_w = 2 * m->cols + 1;
+
+    for (int r = 0; r < grid_h; r++){
+        for (int c= 0; c< grid_w; c++){
+
+            int is_path = 0;
+
+            for (int i = 0; i<result->length;i++){
+                if ((r == (2 * result->path[i].row + 1)) && c == (2*result->path[i].col + 1)){
+                    is_path = 1;
+                    break;
+                }
+            }
+            if (m->grid[r][c] == 1){
+                printf("#");
+            } else if (is_path){
+                printf("O");
+            }else{
+                printf(" ");
+            }
+        }
+        printf("\n");
+    }
+}
+
+
+
+int save_maze_solved(Maze *m, SolveResult *result, Point start, Point end, const char *filename){
+    FILE *fp = fopen(filename, "w");
+
+    if (fp == NULL)
+        return 0;
+
+    int grid_h = 2* m->rows + 1;
+    int grid_w = 2 * m->cols + 1;
+
+    fprintf(fp, "%d %d\n", m->rows, m->cols);
+
+    for (int r = 0; r< grid_h; r++){
+        for (int c = 0; c< grid_w; c++){
+            char ch;
+            if (m->grid[r][c] == 1){
+                ch = '#';
+            } else{
+                ch = ' ';
+                for (int i = 0; i< result->length; i++){
+                    int current_row = 2 * result->path[i].row + 1;
+                    int current_col = 2 * result->path[i].col + 1;
+
+                    if (r == current_row && c == current_col){
+                        ch = '.';
+                        break;
+                    }
+                    if (i > 0){
+                        int qr = 2 * result->path[i - 1].row + 1;
+                        int qc = 2 * result->path[i - 1].col + 1;
+
+                        if (r == (current_row + qr) / 2 && c == (current_col + qc) / 2){
+                            ch = '.';
+                            break;
+                        }
+
+                    }
+                }
+            }
+            if (r == 2 * start.row + 1 && c == 2* start.col + 1)
+                ch = 'S';
+            if (r == 2 * end.row + 1 && c == 2* end.col + 1)
+                ch = 'E';
+
+            fputc(ch, fp);
+        }
+
+        fputc('\n', fp);
+    }
+
+    fclose(fp);
+
+    return 1;
+}
+
+
+int save_exploration(SolveResult *result, const char *filename){
+    FILE *fp = fopen(filename, "w");
+    if (fp == NULL)
+        return 0;
+
+
+    fprintf(fp, "%d\n", result->cells_visited);
+
+    for (int i = 0; i< result->cells_visited; i++){
+        fprintf(fp, "%d %d\n", result->exploration_order[i].row, result->exploration_order[i].col);
+    }
+
+    fclose(fp);
+
+    return 1;
+}

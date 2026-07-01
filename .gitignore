@@ -1,0 +1,11 @@
+
+__pycache__/
+*.pyc
+
+.vscode/
+
+maze
+*.o
+
+maze.txt
+explore.txt
