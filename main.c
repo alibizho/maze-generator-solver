@@ -9,15 +9,27 @@
 int main(int argc, char **argv){
     Maze m;
 
-    if (argc > 2 && strcmp(argv[1], "--load") == 0){
-        m = load_maze(argv[2]);
+
+    const char *algo = "bfs";
+    char *rest[16];
+    int rest_count = 0;
+    for (int i = 1; i < argc; i++){
+        if (strcmp(argv[i], "--algo") == 0 && i + 1 < argc){
+            algo = argv[++i];
+        } else if (rest_count < 16){
+            rest[rest_count++] = argv[i];
+        }
+    }
+
+    if (rest_count >= 2 && strcmp(rest[0], "--load") == 0){
+        m = load_maze(rest[1]);
         if (m.rows == 0){
             return 1;
         }
     } else {
-        int seed = (argc > 1) ? atoi(argv[1]) : (int)time(NULL);
-        int rows = (argc > 2) ? atoi(argv[2]) : 10;
-        int cols = (argc > 3) ? atoi(argv[3]) : rows;
+        int seed = (rest_count > 0) ? atoi(rest[0]) : (int)time(NULL);
+        int rows = (rest_count > 1) ? atoi(rest[1]) : 10;
+        int cols = (rest_count > 2) ? atoi(rest[2]) : rows;
 
         int max_cells = (MAX_SIZE - 1) / 2;
         if (rows < 1) rows = 1;
@@ -31,7 +43,9 @@ int main(int argc, char **argv){
 
     Point start = {0, 0};
     Point end = {m.rows - 1, m.cols - 1};
-    SolveResult result = solve_bfs(&m, start, end);
+    SolveResult result = (strcmp(algo, "dfs") == 0)
+        ? solve_dfs(&m, start, end)
+        : solve_bfs(&m, start, end);
 
     save_maze_solved(&m, &result, start, end, "maze.txt");
     save_exploration(&result, "explore.txt");

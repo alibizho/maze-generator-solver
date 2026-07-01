@@ -26,6 +26,7 @@ int save_maze(Maze *m, const char *filename);
 Maze load_maze(const char *filename);
 
 SolveResult solve_bfs(Maze *m, Point start, Point end);
+SolveResult solve_dfs(Maze *m, Point start, Point end);
 void print_maze(Maze *m);
 void print_path_overlay(Maze *m, SolveResult *r);
 int save_maze_solved(Maze *m, SolveResult *r, Point start, Point end, const char *filename);

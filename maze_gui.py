@@ -35,9 +35,10 @@ class MazeApp:
         self.root = root
         self.chars = [] 
         self.explore = []  
-        self.visited = set()  
+        self.visited = set()
         self.step_index = 0
-        self.after_id = None  
+        self.after_id = None
+        self.current_source = None  # how the current maze was made, so we can re-solve it
 
         controls = tk.Frame(root)
         controls.pack(fill="x", padx=6, pady=6)
@@ -55,6 +56,11 @@ class MazeApp:
         tk.Label(controls, text="Cols").pack(side="left", padx=(8, 2))
         tk.Spinbox(controls, from_=MIN_CELLS, to=MAX_CELLS, width=4,
                    textvariable=self.cols_var).pack(side="left")
+
+        tk.Button(controls, text="Solve BFS",
+                  command=lambda: self.resolve("bfs")).pack(side="left", padx=(12, 0))
+        tk.Button(controls, text="Solve DFS",
+                  command=lambda: self.resolve("dfs")).pack(side="left", padx=(6, 0))
 
         tk.Label(controls, textvariable=self.status).pack(side="left", padx=10)
 
@@ -92,13 +98,32 @@ class MazeApp:
         rows = self.size_from(self.rows_var)
         cols = self.size_from(self.cols_var)
         seed = random.randint(0, 1_000_000)
-        try:
-            subprocess.run([BINARY, str(seed), str(rows), str(cols)],
-                           cwd=HERE, check=True, capture_output=True)
-        except subprocess.CalledProcessError:
-            self.status.set("fail")
+        self.current_source = ("gen", seed, rows, cols)
+        self.run_solver("bfs")
+
+    def resolve(self, algo):
+        if self.current_source is None:
+            self.status.set("generate or load a maze first")
             return
-        self.status.set(f"seed {seed}  ({rows}x{cols})")
+        if not self.compile_binary():
+            return
+        self.run_solver(algo)
+
+    def run_solver(self, algo):
+        if self.current_source[0] == "gen":
+            _, seed, rows, cols = self.current_source
+            args = [BINARY, str(seed), str(rows), str(cols), "--algo", algo]
+            label = f"seed {seed}  ({rows}x{cols})  {algo.upper()}"
+        else:
+            _, path = self.current_source
+            args = [BINARY, "--load", path, "--algo", algo]
+            label = f"{os.path.basename(path)}  {algo.upper()}"
+        try:
+            subprocess.run(args, cwd=HERE, check=True, capture_output=True)
+        except subprocess.CalledProcessError:
+            self.status.set("solve failed")
+            return
+        self.status.set(label)
         self.start_animation()
 
     def read_maze_file(self, path):
@@ -122,14 +147,8 @@ class MazeApp:
             return
         if not self.compile_binary():
             return
-
-        try:
-            subprocess.run([BINARY, "--load", path], cwd=HERE, check=True, capture_output=True)
-        except subprocess.CalledProcessError:
-            self.status.set("could not solve that maze")
-            return
-        self.status.set(f"loaded {os.path.basename(path)}")
-        self.start_animation()
+        self.current_source = ("load", path)
+        self.run_solver("bfs")
 
     def fill_cell(self, gr, gc, color):
         x, y = gc * CELL, gr * CELL
