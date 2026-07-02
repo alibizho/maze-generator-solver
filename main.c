@@ -20,12 +20,13 @@ int main(int argc, char **argv){
             rest[rest_count++] = argv[i];
         }
     }
-
+    // load a maze from the file
     if (rest_count >= 2 && strcmp(rest[0], "--load") == 0){
         m = load_maze(rest[1]);
         if (m.rows == 0){
             return 1;
         }
+        // generate a random maze
     } else {
         int seed = (rest_count > 0) ? atoi(rest[0]) : (int)time(NULL);
         int rows = (rest_count > 1) ? atoi(rest[1]) : 10;

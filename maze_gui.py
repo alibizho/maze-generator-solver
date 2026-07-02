@@ -18,7 +18,7 @@ DEFAULT_CELLS = 10
 
 WALL = "black"
 OPEN_BG = "white"
-VISITED = "blue" 
+VISITED = "light blue" 
 PATH = "red"     
 START = "green"
 END = "blue"
@@ -38,7 +38,7 @@ class MazeApp:
         self.visited = set()
         self.step_index = 0
         self.after_id = None
-        self.current_source = None  # how the current maze was made, so we can re-solve it
+        self.current_source = None  
 
         controls = tk.Frame(root)
         controls.pack(fill="x", padx=6, pady=6)
@@ -78,7 +78,7 @@ class MazeApp:
             subprocess.run(["cc", *sources, "-o", "maze"], cwd=HERE, check=True, capture_output=True)
             return True
         except subprocess.CalledProcessError as e:
-            self.status.set("compile failed - see terminal")
+            self.status.set("compile failed")
             print(e.stderr.decode())
             return False
 
@@ -221,7 +221,7 @@ class MazeApp:
 
 def main():
     root = tk.Tk()
-    root.title("Maze viewer")
+    root.title("Maze")
     MazeApp(root)
     root.mainloop()
 

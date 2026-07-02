@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 
 #include "maze.h"
 
@@ -15,6 +14,7 @@ SolveResult solve_bfs(Maze *m, Point start, Point end){
     int visited[MAX_SIZE][MAX_SIZE] = {0};
     Point came_from[MAX_SIZE][MAX_SIZE];
 
+    // QUEUE First in First Out
     Point queue[MAX_SIZE * MAX_SIZE];
     int front = 0, back = 0;
 
@@ -43,27 +43,29 @@ SolveResult solve_bfs(Maze *m, Point start, Point end){
 
         result.cells_visited++;
 
-
+        // check if the cell is the end 
         if (current.row == end.row && current.col == end.col){
             break;
         }
-
+        // checking in all 4 directions
         for (int d = 0; d < 4; d++){
             int neighbour_row = current.row + directions[d].row;
             int neighbour_col = current.col + directions[d].col;
 
 
-
+            // if the neighbour is outside the maze -> skip
             if (neighbour_row < 0 || neighbour_row >= m->rows || neighbour_col < 0 || neighbour_col >= m->cols){
                 continue;
             }
-
+            // check if its a wall -> skip
             int wall_row = 2 * current.row + directions[d].row + 1;
             int wall_col = 2 * current.col + directions[d].col + 1;
 
             if(m->grid[wall_row][wall_col] == 1){
                 continue;
             }
+
+            // if we already visited it -> skip
             if(visited[neighbour_row][neighbour_col]){
                 continue;
             }
@@ -75,13 +77,13 @@ SolveResult solve_bfs(Maze *m, Point start, Point end){
             back++;
         }
     }
-
+    // check if we found the end
     if (!visited[end.row][end.col]){
         printf("No End found");
         result.length = 0;
         return result;
     }
-
+    // rebuild the whole path
     Point temp[MAX_SIZE * MAX_SIZE];
     int len = 0;
     Point cur = end;
@@ -96,7 +98,7 @@ SolveResult solve_bfs(Maze *m, Point start, Point end){
     len++;
 
     
-
+    // copy temp into result.path in reverse start to end
     for (int i = 0; i<len; i++){
         result.path[i] = temp[len - 1 - i];
     }
@@ -113,7 +115,8 @@ SolveResult solve_dfs(Maze *m, Point start, Point end){
 
     int visited[MAX_SIZE][MAX_SIZE] = {0};
     Point came_from[MAX_SIZE][MAX_SIZE];
-
+    
+    // 1 differences is in DFS we use a STACK (Last in First Out)
     Point stack[MAX_SIZE * MAX_SIZE];
     int top = 0;
 

@@ -11,6 +11,8 @@
 static void shuffle(int a[], int n);
 static void carve(Maze *m, int r, int c, int visited[MAX_SIZE][MAX_SIZE]);
 
+
+
 Maze create_maze(int rows, int cols)
 {
     Maze m;
